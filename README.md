@@ -1,22 +1,22 @@
-# oldhosts
+# oldhost
 
-`oldhosts` is a tool for bug bounty hunters to discover old hosts that are no longer available, but might still be present on different known and related servers.
+`oldhost` is a tool for bug bounty hunters to discover old hosts that are no longer available, but might still be present on different known and related servers.
 
 ## Installation
 
-To install `oldhosts`, follow the steps below:
+To install `oldhost`, follow the steps below:
 
     - Ensure you have Go installed on your system.
     - Run the following command to install the required packages:
     ```
-    go install -v github.com/topscoder/oldhosts
+    go install -v github.com/topscoder/oldhost
     ```
 
 ## Options
 Run the script using the following command-line arguments:
 
     ```
-    oldhosts -ips <ips> -hosts <hosts> [-curl] [-silent]
+    oldhost -ips <ips> -hosts <hosts> [-curl] [-silent]
     ```
 
     - `-ips` (required): Specify an IP address or provide a filename containing IP addresses (one per line).
@@ -32,10 +32,10 @@ View the results:
 
 ## Example
 
-Here is an example command to run `oldhosts`:
+Here is an example command to run `oldhost`:
 
 ```
-oldhosts -ips "192.168.0.1" -hosts "example.com" -curl
+oldhost -ips "192.168.0.1" -hosts "example.com" -curl
 ```
 
 This command will perform HTTP and HTTPS requests to the specified IP addresses and hosts, displaying the results as Curl commands.
