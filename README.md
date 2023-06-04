@@ -6,29 +6,31 @@
 
 To install `oldhost`, follow the steps below:
 
-    - Ensure you have Go installed on your system.
-    - Run the following command to install the required packages:
-    ```
-    go install -v github.com/topscoder/oldhost
-    ```
+- Ensure you have Go installed on your system.
+- Run the following command to install the required packages:
+
+```
+go install -v github.com/topscoder/oldhost
+```
 
 ## Options
 Run the script using the following command-line arguments:
 
-    ```
-    oldhost -ips <ips> -hosts <hosts> [-curl] [-silent]
-    ```
+```
+oldhost -ips <ips> -hosts <hosts> [-curl] [-silent]
+```
 
-    - `-ips` (required): Specify an IP address or provide a filename containing IP addresses (one per line).
-    - `-hosts` (required): Specify the hostname or provide a filename containing hosts (one per line).
-    - `-curl` (optional): Output the results as Curl commands.
-    - `-silent` (optional): Run in silent mode, suppresses non-200 responses (except for content length).
+- `-ips` (required): Specify an IP address or provide a filename containing IP addresses (one per line).
+- `-hosts` (required): Specify the hostname or provide a filename containing hosts (one per line).
+- `-curl` (optional): Output the results as Curl commands.
+- `-silent` (optional): Run in silent mode, suppresses non-200 responses (except for content length).
 
 View the results:
 
-    - The script will perform HTTP and HTTPS requests for each IP and host combination.
-    - The script will display the response status code and content length for each successful request.
-    - If the `-curl` flag is specified, Curl commands will be displayed instead of the response details.
+- The script will perform HTTP and HTTPS requests for each IP and host combination.
+- The script will display the response status code and content length for each successful request.
+- If the `-curl` flag is specified, Curl commands will be displayed instead of the response details.
+
 
 ## Example
 
