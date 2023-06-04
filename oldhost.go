@@ -5,7 +5,9 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
+	"strings"
 	"sync"
 	"time"
 )
@@ -13,6 +15,7 @@ import (
 func main() {
 	ipsArg := flag.String("ips", "", "IPs (string or filename)")
 	hostsArg := flag.String("hosts", "", "Hosts (string or filename)")
+	curlArg := flag.Bool("curl", false, "Output as Curl command")
 	silent := flag.Bool("silent", false, "Silent mode")
 	flag.Parse()
 
@@ -26,10 +29,6 @@ func main() {
 	if err != nil {
 		fmt.Println("Error reading hosts:", err)
 		return
-	}
-
-	client := http.Client{
-		Timeout: 1 * time.Second,
 	}
 
 	var wg sync.WaitGroup
@@ -46,37 +45,96 @@ func main() {
 					<-semaphore // Release the slot back to the semaphore
 				}()
 
-				url := fmt.Sprintf("http://%s", ip)
-				req, err := http.NewRequest("GET", url, nil)
-				if err != nil {
-					if !*silent {
-						fmt.Printf("Error creating request for IP %s and host %s: %s\n", ip, host, err)
+				// Do HTTP request
+				respStatusCode, contentLength, error := doHttpRequest(ip, host, *silent)
+
+				if *silent && (respStatusCode != http.StatusOK || error != nil) {
+					return
+				}
+
+				if respStatusCode == http.StatusOK {
+					if *curlArg {
+						fmt.Printf("curl -ik http://%s -H \"Host: %s\"\t(Content-Length: %d)\n", ip, host, contentLength)
+					} else {
+						fmt.Printf("%d\t%s\t%s\n", contentLength, ip, host)
 					}
+				}
+
+				// Do HTTPS request
+				respStatusCode, contentLength, error = doHttpsRequest(ip, host, *silent)
+
+				if *silent && (respStatusCode != http.StatusOK || error != nil) {
 					return
 				}
-				req.Host = host
 
-				resp, err := client.Do(req)
-				if err != nil {
-					if !*silent {
-						fmt.Printf("Error making request for IP %s and host %s: %s\n", ip, host, err)
+				if respStatusCode == http.StatusOK {
+					if *curlArg {
+						fmt.Printf("curl -ik http://%s -H \"Host: %s\"\t(Content-Length: %d)\n", ip, host, contentLength)
+					} else {
+						fmt.Printf("%d\t%s\t%s\thttps\n", contentLength, ip, host)
 					}
-					return
-				}
-				defer resp.Body.Close()
-
-				if *silent && resp.StatusCode != http.StatusOK {
-					return
-				}
-
-				if resp.StatusCode == http.StatusOK {
-					fmt.Printf("%s\t%s\n", ip, host)
 				}
 			}(ip, host)
 		}
 	}
 
 	wg.Wait()
+}
+
+func doHttpRequest(ip string, host string, silent bool) (int, int64, error) {
+	return doRequest(ip, host, silent, false)
+}
+
+func doHttpsRequest(ip string, host string, silent bool) (int, int64, error) {
+	return doRequest(ip, host, silent, true)
+}
+
+func doRequest(ip string, host string, silent bool, https bool) (int, int64, error) {
+	var scheme string
+	if https {
+		scheme = "https"
+	} else {
+		scheme = "http"
+	}
+
+	client := http.Client{
+		Timeout: 1 * time.Second,
+	}
+
+	url := fmt.Sprintf("%s://%s", scheme, ip)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		if !silent {
+			fmt.Printf("Error creating request for IP %s and host %s: %s\n", ip, host, err)
+		}
+		return 0, 0, err
+	}
+	req.Host = cleanupHost(host)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		if !silent {
+			fmt.Printf("Error making request for IP %s and host %s: %s\n", ip, host, err)
+		}
+		return 0, 0, err
+	}
+	defer resp.Body.Close()
+
+	contentLength := resp.ContentLength
+
+	return resp.StatusCode, contentLength, nil
+}
+
+func cleanupHost(host string) string {
+	host = strings.TrimSpace(host)
+	host = strings.TrimSuffix(host, "/")
+
+	u, err := url.Parse(host)
+	if err == nil {
+		host = u.Host
+	}
+
+	return host
 }
 
 func readLines(arg string) ([]string, error) {
