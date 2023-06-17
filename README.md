@@ -10,7 +10,7 @@ To install `oldhost`, follow the steps below:
 - Run the following command to install the required packages:
 
 ```
-go install -v github.com/topscoder/oldhost
+go install -v github.com/topscoder/oldhost@latest
 ```
 
 ## Options
