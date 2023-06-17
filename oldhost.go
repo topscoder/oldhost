@@ -56,7 +56,7 @@ func main() {
 					if *curlArg {
 						fmt.Printf("curl -ik http://%s -H \"Host: %s\"\t(Content-Length: %d)\n", ip, host, contentLength)
 					} else {
-						fmt.Printf("%d\t%s\t%s\n", contentLength, ip, host)
+						fmt.Printf("[%d]\t[%d]\t%s\t%s\n", respStatusCode, contentLength, ip, host)
 					}
 				}
 
@@ -71,7 +71,7 @@ func main() {
 					if *curlArg {
 						fmt.Printf("curl -ik http://%s -H \"Host: %s\"\t(Content-Length: %d)\n", ip, host, contentLength)
 					} else {
-						fmt.Printf("%d\t%s\t%s\thttps\n", contentLength, ip, host)
+						fmt.Printf("[%d]\t[%d]\t%s\t%s\thttps\n", respStatusCode, contentLength, ip, host)
 					}
 				}
 			}(ip, host)
